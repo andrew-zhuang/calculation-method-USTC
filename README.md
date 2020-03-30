@@ -1,2 +1,3 @@
 # calculation-method-USTC
-some practices fo
+some lab in the course calculation method
+based on python
