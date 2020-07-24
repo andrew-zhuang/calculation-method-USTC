@@ -1,0 +1,141 @@
+#include <stdio.h>
+#include <math.h>
+#define n 9
+double Gauss(){
+	int i,j,k,u;
+	double t[n],max,z=0,s;
+	double a[n][n]={{31,-13,0,0,0,-10,0,0,0}, 
+	                {-13,35,-9,0,-11,0,0,0,0},
+			        {0,-9,31,-10,0,0,0,0,0},
+			        {0,0,-10,79,-30,0,0,0,-9}, 
+		            {0,0,0,-30,57,-7,0,-5,0},
+			        {0,0,0,0,-7,47,-30,0,0}, 
+			        {0,0,0,0,0,-30,41,0,0}, 
+			        {0,0,0,0,-5,0,0,27,-2}, 
+			        {0,0,0,-9,0,0,0,-2,29}};
+	double b[n]={-15,27,-23,0,-20,12,-7,7,10};
+	double x1[n]={0,0,0,0,0,0,0,0,0};
+	double x2[n];
+	double x3[n];
+	for(i=0;i<n;i++){
+		s=0;
+		for(j=0;j<i;j++){
+			s=s+a[i][j]*x3[j];
+		}
+		for(j=i+1;j<n;j++){
+			s=s+a[i][j]*x1[j];
+		}
+		x3[i]=(b[i]-s)/a[i][i];
+	}
+	for(u=0;u<n;u++){
+		x2[u]=x3[u];
+	}
+	max=1.0;
+	while(max>0.00000001){
+		for(u=0;u<n;u++){
+			x1[u]=x2[u];
+		}
+		for(i=0;i<n;i++){
+			s=0;
+			for(j=0;j<n;j++){
+				s=s+a[i][j]*x2[j];
+			}
+			x2[i]=(b[i]-s+a[i][i]*x2[i])/a[i][i];
+		}
+		max=fabs(x1[0]-x2[0]);
+	    for(k=0;k<n;k++){
+	        t[k]=fabs(x1[k]-x2[k]);
+		    if(t[k]>max) 
+			    max=t[k];
+        }
+		z++;
+	}
+	for(i=0;i<n;i++){
+		printf("%.12e \n",x2[i]);
+	}
+	printf("Gauss-seidel迭代总迭代步数为：%lf\n",z);
+}
+double SOR(){
+	int i,j,k,u,m;
+	double t[n],max,min,s,x,y,z=0,omega[100],r[100];
+	double a[n][n]={{31,-13,0,0,0,-10,0,0,0}, 
+	                {-13,35,-9,0,-11,0,0,0,0},
+			        {0,-9,31,-10,0,0,0,0,0},
+			        {0,0,-10,79,-30,0,0,0,-9}, 
+		            {0,0,0,-30,57,-7,0,-5,0},
+			        {0,0,0,0,-7,47,-30,0,0}, 
+			        {0,0,0,0,0,-30,41,0,0}, 
+			        {0,0,0,0,-5,0,0,27,-2}, 
+			        {0,0,0,-9,0,0,0,-2,29}};
+	double b[n]={-15,27,-23,0,-20,12,-7,7,10};
+	double x1[n]={0,0,0,0,0,0,0,0,0};
+	double x2[n];
+	double x3[n];
+	for(m=1;m<100;m++){
+		omega[m]=m/50.0;
+	}
+	for(m=1;m<100;m++){
+	    for(i=0;i<n;i++){
+		    s=0;
+		    for(j=0;j<i;j++){
+	    		s=s+a[i][j]*x3[j];
+	    	}
+		    for(j=i+1;j<n;j++){
+		    	s=s+a[i][j]*x1[j];
+		    }
+		    s=(b[i]-s)/a[i][i];
+		    x3[i]=(1.0-omega[m])*x3[i]+omega[m]*s;
+	    }
+	    for(u=0;u<n;u++){
+		    x2[u]=x3[u];
+	    }
+	    max=1.0;
+    	while(max>0.00000001){
+    		for(u=0;u<n;u++){
+	      		x1[u]=x2[u];
+	    	}
+	    	for(i=0;i<n;i++){
+		    	s=0;
+		    	for(j=0;j<n;j++){
+		    		s=s+a[i][j]*x2[j];
+		    	}
+		    	s=(b[i]-s+a[i][i]*x2[i])/a[i][i];
+		    	x2[i]=(1-omega[m])*x2[i]+omega[m]*s;
+	    	}
+			z++;
+	    	max=fabs(x1[0]-x2[0]);
+	        for(k=0;k<n;k++){
+	            t[k]=fabs(x1[k]-x2[k]);
+	    	    if(t[k]>max) 
+				    max=t[k];
+            }
+    	}
+    	printf("松弛因子：%lf，%lf\n",omega[m],z); 
+    	r[m]=z;
+    	for(i=0;i<n;i++){
+    		x1[i]=0;
+    		x2[i]=x3[i]=0;
+		}
+		z=0;
+    }
+    min=r[1];
+    for(i=1;i<100;i++){
+    	if(min>r[i]){
+    		min=r[i];
+    		y=omega[i];
+		}
+	}
+	for(i=1;i<100;i++){
+    	if(r[i]==min){
+    		x=omega[i];
+		}
+	}
+	printf("最佳松弛因子为：%lf,%lf",y,x);
+} 
+int main(){
+	printf("Gauss-seidel迭代根为：\n");
+	Gauss();
+	printf("\n");
+	printf("SOR迭代步数为：\n");
+	SOR();
+}
